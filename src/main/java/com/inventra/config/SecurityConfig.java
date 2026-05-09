@@ -32,19 +32,16 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**").permitAll()
-
                         .requestMatchers("/api/products/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/products/supplier/**").hasAnyRole("SUPPLIER","ADMIN")
-                        .requestMatchers("/api/products/**")
-                        .hasAnyRole("USER", "ADMIN", "SUPPLIER")
-
-                        .requestMatchers("/api/purchases/**").hasRole("ADMIN")
-
-                        .requestMatchers("/api/sales/**")
-                        .hasAnyRole("USER", "ADMIN")
-
-                        .requestMatchers("/api/inventory/**").hasRole("ADMIN")
-                        .requestMatchers("/api/inventory-transactions/**").hasRole("ADMIN")
+                        .requestMatchers("/api/products/supplier/**").hasAnyRole("SUPPLIER","ADMIN","MANAGER")
+                        .requestMatchers("/api/products/**").hasAnyRole("STAFF", "ADMIN", "SUPPLIER")
+                        .requestMatchers("/api/purchases/**").hasAnyRole("ADMIN","MANAGER","SUPPLIER")
+                        .requestMatchers("/api/sales/**").hasAnyRole("STAFF", "ADMIN","MANAGER")
+                        .requestMatchers("/api/managers/**").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers("/api/staff/**").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers("/api/customers/**").hasAnyRole("ADMIN", "MANAGER", "STAFF")
+                        .requestMatchers("/api/inventory/**").hasAnyRole("ADMIN","MANAGER")
+                        .requestMatchers("/api/inventory-transactions/**").hasAnyRole("ADMIN","MANAGER")
 
                         .anyRequest().authenticated()
                 )

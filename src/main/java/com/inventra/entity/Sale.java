@@ -1,9 +1,8 @@
 package com.inventra.entity;
 
-import com.inventra.entity.enums.SaleStatus;
+import com.inventra.entity.enums.SalePaymentMode;
 import jakarta.persistence.*;
 import lombok.Data;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,26 +12,30 @@ import java.util.List;
 @Table(name = "sales")
 @Data
 public class Sale {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // sales.user_id FK -> users.id
+    // the user who created the sale — STAFF, MANAGER, or ADMIN
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "sold_by", nullable = false)
+    private User soldBy;
+
+    // customer details entered at billing
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
 
     @Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
     private BigDecimal totalAmount;
 
     @Enumerated(EnumType.STRING)
-    private SaleStatus status; // e.g., PENDING, PAID, DELIVERED
+    @Column(name = "payment_mode", nullable = false)
+    private SalePaymentMode paymentMode;
 
     @Column(name = "sale_date")
     private LocalDateTime saleDate;
-
-    @Column(name = "delivered_at")
-    private LocalDateTime deliveredAt;
 
     @Column(name = "receipt_path")
     private String receiptPath;

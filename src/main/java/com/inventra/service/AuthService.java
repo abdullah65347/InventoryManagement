@@ -53,6 +53,28 @@ public class AuthService {
         return "User registered successfully";
     }
 
+    /* ---------------- REGISTER with role ---------------- */
+    public String registerWithRole(RegisterRequest request, Role role) {
+        if (userRepository.existsByEmail(request.getEmail()))
+            throw new RuntimeException("Email already exists");
+
+        if (request.getPhone() != null && !request.getPhone().isBlank()
+                && userRepository.existsByPhone(request.getPhone()))
+            throw new RuntimeException("Phone already exists");
+
+        User user = new User();
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+        user.setPhone(request.getPhone());
+        user.setAddress(request.getAddress());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(role);
+        user.setActive(true);
+
+        userRepository.save(user);
+        return "User registered successfully with role " + role.name();
+    }
+
     /* ---------------- LOGIN (Email OR Phone) ---------------- */
     public JwtResponse login(LoginRequest request) {
 

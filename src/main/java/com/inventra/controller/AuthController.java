@@ -3,8 +3,10 @@ package com.inventra.controller;
 import com.inventra.dto.request.LoginRequest;
 import com.inventra.dto.request.RegisterRequest;
 import com.inventra.dto.response.JwtResponse;
+import com.inventra.entity.enums.Role;
 import com.inventra.service.AuthService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,6 +30,15 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
         return ResponseEntity.ok(authService.register(request));
+    }
+
+    /* ----- Create Supplier, Staff, Mangager by admin ----------- */
+    @PostMapping("/register/{role}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> registerWithRole(
+            @RequestBody RegisterRequest request,
+            @PathVariable Role role) {
+        return ResponseEntity.ok(authService.registerWithRole(request, role));
     }
 
     /* ---------------- LOGIN ---------------- */
