@@ -11,9 +11,9 @@ public class InventoryResponseDTO {
     private Long productId;
     private String productName;
     private String sku;
-
     private Integer availableStock;
     private Integer reorderLevel;
-
+    private Long supplierId;
+    private String supplierName;
     private LocalDateTime lastUpdated;
 }

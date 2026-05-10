@@ -40,10 +40,19 @@ public class InventoryController {
     @PutMapping("/product/{productId}/reorder")
     public ResponseEntity<InventoryResponseDTO> updateReorder(
             @PathVariable Long productId,
-            @RequestParam Integer level
+            @RequestParam(required = false) Integer level,
+            @RequestBody(required = false) java.util.Map<String, Integer> body
     ) {
-        return ResponseEntity.ok(
-                inventoryService.updateReorderLevel(productId, level)
-        );
+        Integer resolvedLevel = level;
+        if (resolvedLevel == null && body != null) {
+            resolvedLevel = body.get("reorderLevel");
+        }
+        if (resolvedLevel == null) throw new IllegalArgumentException("Reorder level required");
+        return ResponseEntity.ok(inventoryService.updateReorderLevel(productId, resolvedLevel));
+    }
+
+    @GetMapping("/low-stock")
+    public ResponseEntity<List<InventoryResponseDTO>> getLowStock() {
+        return ResponseEntity.ok(inventoryService.getLowStock());
     }
 }

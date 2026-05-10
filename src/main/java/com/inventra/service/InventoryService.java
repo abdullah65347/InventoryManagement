@@ -43,9 +43,17 @@ public class InventoryService {
         return toDTO(inventoryRepo.save(inv));
     }
 
+    public List<InventoryResponseDTO> getLowStock() {
+        return inventoryRepo.findAll().stream()
+                .filter(inv -> inv.getAvailableStock() <= inv.getReorderLevel())
+                .map(this::toDTO).toList();
+    }
+
     private InventoryResponseDTO toDTO(Inventory inv) {
         InventoryResponseDTO dto = new InventoryResponseDTO();
         dto.setId(inv.getId());
+        dto.setSupplierId(inv.getProduct().getSupplier().getId());
+        dto.setSupplierName(inv.getProduct().getSupplier().getUser().getName());
         dto.setProductId(inv.getProduct().getId());
         dto.setProductName(inv.getProduct().getName());
         dto.setAvailableStock(inv.getAvailableStock());
