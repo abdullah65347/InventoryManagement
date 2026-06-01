@@ -11,6 +11,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import java.util.Map;
+
 @Tag(
         name = "Authentication",
         description = "User registration, login and current-user APIs"
@@ -28,17 +30,24 @@ public class AuthController {
 
     /* ---------------- REGISTER ---------------- */
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
-        return ResponseEntity.ok(authService.register(request));
+    public ResponseEntity<Map<String, String>> register(
+            @RequestBody RegisterRequest request) {
+
+        return ResponseEntity.ok(
+                Map.of("message", authService.register(request))
+        );
     }
 
     /* ----- Create Supplier, Staff, Mangager by admin ----------- */
     @PostMapping("/register/{role}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> registerWithRole(
+    public ResponseEntity<Map<String, String>> registerWithRole(
             @RequestBody RegisterRequest request,
             @PathVariable Role role) {
-        return ResponseEntity.ok(authService.registerWithRole(request, role));
+
+        return ResponseEntity.ok(
+                Map.of("message", authService.registerWithRole(request, role))
+        );
     }
 
     /* ---------------- LOGIN ---------------- */

@@ -1,10 +1,12 @@
 package com.inventra.service;
 
+import com.inventra.dto.request.AdminProductRequestDTO;
 import com.inventra.dto.request.ProductRequestDTO;
 import com.inventra.dto.response.AdminProductResponseDTO;
 import com.inventra.dto.response.SupplierProductResponseDTO;
 import com.inventra.dto.response.UserProductResponseDTO;
 import com.inventra.entity.*;
+import com.inventra.entity.enums.TransactionType;
 import com.inventra.exception.ResourceNotFoundException;
 import com.inventra.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ public class ProductService {
     private final SupplierRepository supplierRepo;
 
     private final InventoryRepository inventoryRepo;
+    private final InventoryTransactionService inventoryTxService;
 
     // ================= CREATE PRODUCT =================
     @Transactional
@@ -49,14 +52,56 @@ public class ProductService {
 
         p = productRepo.save(p);
 
-        // create inventory (admin stock = 0)
-        Inventory inv = new Inventory();
-        inv.setProduct(p);
-        inv.setAvailableStock(0);
-        inv.setReorderLevel(0);
-        inventoryRepo.save(inv);
-
         return toSupplierDTO(p);
+    }
+    @Transactional
+    public AdminProductResponseDTO createProductByAdmin(
+            AdminProductRequestDTO dto) {
+
+        if (productRepo.existsBySku(dto.getSku())) {
+            throw new IllegalArgumentException("SKU already exists");
+        }
+
+        if (dto.getQuantity() == null || dto.getQuantity() <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than 0");
+        }
+
+        Product product = new Product();
+
+        product.setName(dto.getName());
+        product.setDescription(dto.getDescription());
+        product.setSku(dto.getSku());
+
+        product.setSupplierToAdminPrice(dto.getCostPrice());
+        product.setAdminToUserPrice(dto.getSellingPrice());
+
+        if (dto.getSupplierId() != null) {
+            Supplier supplier = supplierRepo.findById(dto.getSupplierId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Supplier not found"));
+
+            product.setSupplier(supplier);
+            product.setCategory(supplier.getCategory());
+        }
+
+        product = productRepo.save(product);
+
+        Inventory inventory = new Inventory();
+        inventory.setProduct(product);
+        inventory.setAvailableStock(0);
+        inventory.setReorderLevel(10);
+
+        inventoryRepo.save(inventory);
+
+        inventoryTxService.process(
+                product.getId(),
+                TransactionType.STOCK_IN,
+                dto.getQuantity()
+        );
+
+        Inventory savedInventory = inventoryRepo.findByProductId(product.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Inventory not found"));
+
+        return toAdminDTO(product, savedInventory);
     }
 
     // ================= ADMIN PRICE =================
@@ -113,20 +158,24 @@ public class ProductService {
 
     // ================= USER VIEW =================
     public List<UserProductResponseDTO> getProductsForUser() {
-        return productRepo.findByIsActiveTrue()
+
+        return inventoryRepo.findAll()
                 .stream()
-                .map(this::toUserDTO)
+                .filter(inv -> inv.getAvailableStock() > 0)
+                .filter(inv ->
+                        inv.getProduct().getAdminToUserPrice() != null &&
+                                inv.getProduct().getAdminToUserPrice().compareTo(BigDecimal.ZERO) > 0
+                )
+                .map(inv -> toUserDTO(inv.getProduct()))
                 .toList();
     }
 
     // ================= ADMIN VIEW =================
     public List<AdminProductResponseDTO> getProductsForAdmin() {
-        return productRepo.findByIsActiveTrue()
+
+        return inventoryRepo.findAll()
                 .stream()
-                .map(p -> {
-                    Inventory inv = inventoryRepo.findByProductId(p.getId()).orElse(null);
-                    return toAdminDTO(p, inv);
-                })
+                .map(inv -> toAdminDTO(inv.getProduct(), inv))
                 .toList();
     }
 

@@ -104,6 +104,7 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return Map.of(
+                "id",user.getId(),
                 "name", user.getName(),
                 "email", user.getEmail(),
                 "phone", user.getPhone(),

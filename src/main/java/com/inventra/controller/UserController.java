@@ -1,6 +1,8 @@
 package com.inventra.controller;
 
+import com.inventra.dto.response.UserResponseDto;
 import com.inventra.entity.User;
+import com.inventra.entity.enums.Role;
 import com.inventra.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,19 +28,19 @@ public class UserController {
 
     // GET /api/users
     @GetMapping
-    public ResponseEntity<List<User>> getAll() {
+    public ResponseEntity<List<UserResponseDto>> getAll() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
     // GET /api/users/{id}
     @GetMapping("/{id}")
-    public ResponseEntity<User> getById(@PathVariable Long id) {
+    public ResponseEntity<UserResponseDto> getById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
     // PUT /api/users/{id}
     @PutMapping("/{id}")
-    public ResponseEntity<User> update(@PathVariable Long id, @RequestBody User updated) {
+    public ResponseEntity<UserResponseDto> update(@PathVariable Long id, @RequestBody User updated) {
         return ResponseEntity.ok(userService.updateUser(id, updated));
     }
 
@@ -53,7 +55,7 @@ public class UserController {
 
     // PUT /api/users/{id}/active?active=true|false
     @PutMapping("/{id}/active")
-    public ResponseEntity<User> setActive(@PathVariable Long id, @RequestParam boolean active) {
+    public ResponseEntity<UserResponseDto> setActive(@PathVariable Long id, @RequestParam boolean active) {
         return ResponseEntity.ok(userService.setActive(id, active));
     }
 
@@ -62,5 +64,16 @@ public class UserController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // ASSIGN Role
+    @PutMapping("/{id}/role")
+    public ResponseEntity<UserResponseDto> assignRole(
+            @PathVariable Long id,
+            @RequestParam Role role) {
+
+        return ResponseEntity.ok(
+                userService.assignRole(id, role)
+        );
     }
 }

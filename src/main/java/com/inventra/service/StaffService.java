@@ -97,8 +97,15 @@ public class StaffService {
      @Transactional
      public StaffResponseDTO setActive(Long id, boolean active) {
           Staff staff = staffRepo.findById(id)
-                  .orElseThrow(() -> new ResourceNotFoundException("Staff not found with id " + id));
+                  .orElseThrow(() -> new ResourceNotFoundException("Staff not found"));
+
           staff.setActive(active);
+
+          if (staff.getUser() != null) {
+               staff.getUser().setActive(active);
+               userRepo.save(staff.getUser());
+          }
+
           return toDTO(staffRepo.save(staff));
      }
 

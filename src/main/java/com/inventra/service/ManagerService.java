@@ -69,9 +69,17 @@ public class ManagerService {
 
      @Transactional
      public ManagerResponseDTO setActive(Long id, boolean active) {
+
           Manager manager = managerRepo.findById(id)
-                  .orElseThrow(() -> new ResourceNotFoundException("Manager not found with id " + id));
+                  .orElseThrow(() -> new ResourceNotFoundException("Manager not found"));
+
           manager.setActive(active);
+
+          if (manager.getUser() != null) {
+               manager.getUser().setActive(active);
+               userRepo.save(manager.getUser());
+          }
+
           return toDTO(managerRepo.save(manager));
      }
 

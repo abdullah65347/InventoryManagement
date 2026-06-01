@@ -34,7 +34,20 @@ public class InventoryTransactionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
         Inventory inv = inventoryRepo.findByProductId(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("Inventory not found for product " + productId));
+                .orElseGet(() -> {
+
+                    if (type != TransactionType.STOCK_IN) {
+                        throw new ResourceNotFoundException(
+                                "Inventory not found for product " + productId);
+                    }
+
+                    Inventory inventory = new Inventory();
+                    inventory.setProduct(product);
+                    inventory.setAvailableStock(0);
+                    inventory.setReorderLevel(10);
+
+                    return inventoryRepo.save(inventory);
+                });
 
         if (type == TransactionType.STOCK_IN) {
             inv.setAvailableStock(inv.getAvailableStock() + qty);
