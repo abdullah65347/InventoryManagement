@@ -5,19 +5,19 @@ import com.inventra.dto.response.CategoryResponseDTO;
 import com.inventra.entity.Category;
 import com.inventra.exception.ResourceNotFoundException;
 import com.inventra.repository.CategoryRepository;
+import com.inventra.repository.InventoryRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
-
-    public CategoryService(CategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
-    }
+    private final InventoryRepository inventoryRepository;
 
     // CREATE
     public CategoryResponseDTO createCategory(CategoryRequestDTO dto) {
@@ -51,6 +51,23 @@ public class CategoryService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Category not found with id " + id));
         return toResponse(category);
+    }
+
+    //GET COUNTS PER CATEGORY
+    public List<CategoryResponseDTO> getCategoryWiseProductCount() {
+
+        return inventoryRepository.getProductCountByCategory()
+                .stream()
+                .map(row -> {
+                    CategoryResponseDTO dto = new CategoryResponseDTO();
+
+                    dto.setId((Long) row[0]);
+                    dto.setName((String) row[1]);
+                    dto.setTotalProducts((Long) row[2]);
+
+                    return dto;
+                })
+                .toList();
     }
 
     // UPDATE

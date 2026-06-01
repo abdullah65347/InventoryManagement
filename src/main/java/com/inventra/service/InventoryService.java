@@ -52,12 +52,16 @@ public class InventoryService {
     private InventoryResponseDTO toDTO(Inventory inv) {
         InventoryResponseDTO dto = new InventoryResponseDTO();
         dto.setId(inv.getId());
+        dto.setSku(inv.getProduct().getSku());
         dto.setSupplierId(inv.getProduct().getSupplier().getId());
+        if(inv.getProduct().getSupplier().getUser() != null){
         dto.setSupplierName(inv.getProduct().getSupplier().getUser().getName());
+        }
         dto.setProductId(inv.getProduct().getId());
         dto.setProductName(inv.getProduct().getName());
         dto.setAvailableStock(inv.getAvailableStock());
         dto.setReorderLevel(inv.getReorderLevel());
+        dto.setLastUpdated(inv.getLastUpdated());
         return dto;
     }
 }

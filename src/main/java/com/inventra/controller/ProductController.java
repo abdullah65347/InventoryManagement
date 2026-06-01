@@ -1,5 +1,6 @@
 package com.inventra.controller;
 
+import com.inventra.dto.request.AdminProductRequestDTO;
 import com.inventra.dto.request.ProductRequestDTO;
 import com.inventra.dto.response.AdminProductResponseDTO;
 import com.inventra.dto.response.ProductResponseDTO;
@@ -9,6 +10,7 @@ import com.inventra.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -34,6 +36,16 @@ public class ProductController {
      ) {
           return ResponseEntity.status(HttpStatus.CREATED)
                   .body(productService.createProduct(dto));
+     }
+
+     //PRODUCT CREATE BY ADMIN
+     @PostMapping("/admin")
+     @PreAuthorize("hasRole('ADMIN')")
+     public ResponseEntity<AdminProductResponseDTO> createProductByAdmin(
+             @RequestBody AdminProductRequestDTO dto) {
+
+          return ResponseEntity.status(HttpStatus.CREATED)
+                  .body(productService.createProductByAdmin(dto));
      }
 
      // ADMIN VIEW

@@ -48,6 +48,13 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.getCategoryById(id));
     }
 
+    @GetMapping("/category-count")
+    public ResponseEntity<List<CategoryResponseDTO>> getCategoryWiseCount() {
+        return ResponseEntity.ok(
+                categoryService.getCategoryWiseProductCount()
+        );
+    }
+
     // PUT /api/categories/{id}
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
