@@ -43,6 +43,15 @@ public class SaleController {
         return ResponseEntity.ok(saleService.getBySoldBy(userId));
     }
 
+    @GetMapping("/manager/user/{userId}")
+    public ResponseEntity<List<SaleResponseDTO>> getSalesByManagerUser(
+            @PathVariable Long userId) {
+
+        return ResponseEntity.ok(
+                saleService.getSalesByManagerUser(userId)
+        );
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'STAFF')")
     public ResponseEntity<SaleResponseDTO> getById(@PathVariable Long id) {

@@ -1,6 +1,7 @@
 package com.inventra.repository;
 
 import com.inventra.entity.User;
+import com.inventra.entity.enums.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -17,5 +18,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByPhone(String phone);
 
-    List<User> findByActiveTrue();
+    List<User> findByRole(Role role);
 }

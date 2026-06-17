@@ -27,6 +27,7 @@ public class SaleService {
      private final UserRepository userRepo;
      private final CustomerRepository customerRepo;
      private final InventoryTransactionService inventoryTxService;
+     private final ManagerRepository managerRepo;
 
      // ================= CREATE =================
      @Transactional
@@ -103,6 +104,18 @@ public class SaleService {
      public List<SaleResponseDTO> getBySoldBy(Long userId) {
           return saleRepo.findBySoldByIdOrderBySaleDateDesc(userId)
                   .stream().map(this::toDTO).toList();
+     }
+
+     public List<SaleResponseDTO> getSalesByManagerUser(Long userId) {
+
+          Manager manager = managerRepo.findByUserId(userId)
+                  .orElseThrow(() ->
+                          new ResourceNotFoundException("Manager not found"));
+
+          return saleRepo.findSalesByManagerId(manager.getId())
+                  .stream()
+                  .map(this::toDTO)
+                  .toList();
      }
 
      // ================= GET BY ID =================
