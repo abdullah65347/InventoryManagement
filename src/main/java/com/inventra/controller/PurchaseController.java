@@ -55,8 +55,13 @@ public class PurchaseController {
      // ADMIN or SUPPLIER cancels
      @PutMapping("/{id}/cancel")
 //     @PreAuthorize("hasAnyRole('ADMIN', 'SUPPLIER')")
-     public ResponseEntity<PurchaseResponseDTO> cancel(@PathVariable Long id) {
-          return ResponseEntity.ok(purchaseService.cancelPurchase(id));
+     public ResponseEntity<PurchaseResponseDTO> cancel(
+             @PathVariable Long id,
+             @RequestParam Long userId) {
+
+          return ResponseEntity.ok(
+                  purchaseService.cancelPurchase(id, userId)
+          );
      }
 
      @GetMapping

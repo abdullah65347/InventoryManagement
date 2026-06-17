@@ -224,7 +224,7 @@ public class ProductService {
         dto.setSupplierToAdminPrice(p.getSupplierToAdminPrice());
         dto.setAdminToUserPrice(p.getAdminToUserPrice());
         dto.setAvailableStock(inv != null ? inv.getAvailableStock() : 0);
-
+        dto.setCategoryId(p.getCategory().getId());
         dto.setCategoryName(
                 p.getCategory() != null ? p.getCategory().getName() : null
         );

@@ -144,10 +144,13 @@ public class PurchaseService {
 
     // ================= CANCEL (ADMIN or SUPPLIER) =================
     @Transactional
-    public PurchaseResponseDTO cancelPurchase(Long purchaseId) {
+    public PurchaseResponseDTO cancelPurchase(Long purchaseId, Long userId) {
 
         Purchase purchase = purchaseRepo.findById(purchaseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Purchase not found"));
+
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (purchase.getStatus() == PurchaseStatus.CONFIRMED)
             throw new IllegalStateException("Confirmed purchase cannot be canceled");
@@ -156,9 +159,11 @@ public class PurchaseService {
             throw new IllegalStateException("Purchase is already canceled");
 
         purchase.setStatus(PurchaseStatus.CANCELED);
+        purchase.setConfirmedBy(user);
+        purchase.setConfirmedAt(LocalDateTime.now());
+
         return toDTO(purchaseRepo.save(purchase));
     }
-
     // ================= GET ALL =================
     public List<PurchaseResponseDTO> getAllPurchases() {
         return purchaseRepo.findAll().stream().map(this::toDTO).toList();
@@ -184,15 +189,27 @@ public class PurchaseService {
     private PurchaseResponseDTO toDTO(Purchase purchase) {
 
         PurchaseResponseDTO dto = new PurchaseResponseDTO();
+
         dto.setId(purchase.getId());
         dto.setSupplierId(purchase.getSupplier().getId());
+        dto.setSupplierName(purchase.getSupplier().getUser().getName()); // add this
         dto.setStatus(purchase.getStatus().name());
         dto.setTotalAmount(purchase.getTotalAmount());
-        dto.setConfirmedAt(purchase.getConfirmedAt());
 
-        if (purchase.getConfirmedBy() != null) {
-            dto.setConfirmedById(purchase.getConfirmedBy().getId());
-            dto.setConfirmedByName(purchase.getConfirmedBy().getName());
+        // show confirmation details only for CONFIRMED or CANCELED
+        if (purchase.getStatus() == PurchaseStatus.CONFIRMED
+                || purchase.getStatus() == PurchaseStatus.CANCELED) {
+
+            dto.setConfirmedAt(purchase.getConfirmedAt());
+
+            if (purchase.getConfirmedBy() != null) {
+                dto.setConfirmedById(purchase.getConfirmedBy().getId());
+                dto.setConfirmedByName(purchase.getConfirmedBy().getName());
+            }
+        } else {
+            dto.setConfirmedAt(null);
+            dto.setConfirmedById(null);
+            dto.setConfirmedByName(null);
         }
 
         dto.setItems(

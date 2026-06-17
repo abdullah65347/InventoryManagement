@@ -12,13 +12,15 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
      Optional<Inventory> findByProductId(Long productId);
 
      @Query("""
-                 SELECT p.category.id,
-                        p.category.name,
-                        COUNT(i.id)
-                 FROM Inventory i
-                 JOIN i.product p
-                 GROUP BY p.category.id, p.category.name
-             """)
+    SELECT c.id,
+           c.name,
+           COUNT(i.id)
+    FROM Category c
+    LEFT JOIN c.products p
+    LEFT JOIN Inventory i ON i.product.id = p.id
+    GROUP BY c.id, c.name
+    ORDER BY c.name
+""")
      List<Object[]> getProductCountByCategory();
 
      boolean existsByProduct_Id(Long productId);

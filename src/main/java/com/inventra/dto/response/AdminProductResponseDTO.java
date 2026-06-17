@@ -12,6 +12,7 @@ public class AdminProductResponseDTO {
     private BigDecimal supplierToAdminPrice;
     private BigDecimal adminToUserPrice;
     private Integer availableStock;
+    private Long categoryId;
     private String categoryName;
     private String supplierName;
     private String sku;
